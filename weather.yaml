@@ -1,0 +1,20 @@
+key: TAkhjf8d1nlSlspN # api key
+limit: 10 # 每人每天访问次数上限
+allowed: # 群白名单，在允许列表里才会提供服务
+  - 1149558764
+  - 857066811
+blacklist: # 黑名单用户（不提供服务）
+  - 1781924496
+whitelist: # 白名单用户（不受调用限制）
+  - 1227427929
+db:
+  type: sqlite # mysql | sqlite
+  mysql:
+    username: root
+    password: password
+    host: localhost
+    port: 3306
+    database: example
+    charset: utf8mb4
+  sqlite:
+    path: "./db/weather.db"
