@@ -1,5 +1,7 @@
 key: TAkhjf8d1nlSlspN # api key
 limit: 10 # 每人每天访问次数上限
+admin:
+  - 1227427929 # 管理员帐号
 allowed: # 群白名单，在允许列表里才会提供服务
   - 1149558764
   - 857066811

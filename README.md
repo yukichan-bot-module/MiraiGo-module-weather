@@ -7,6 +7,15 @@ Module for [MiraiGo-Template](https://github.com/Logiase/MiraiGo-Template)
 ## 功能
 
 - 在群聊或私聊接受到「实时天气」时查询实时天气情况
+- 在群聊或私聊接受到「出门建议」时查询当前天气是否适合出门
+- 在群聊或私聊接受到「明天天气」时查询明天天气情况
+
+## 管理员指令
+
+- `.weather.clear.times <uin>` 清空用户 uin
+- `.weather.blacklist.add <uin>` 添加用户到黑名单
+- `.weather.whitelist.add <uin>` 添加用户到白名单
+- `.weather.allowed` 添加群到许可名单
 
 ## 使用方法
 
@@ -39,6 +48,8 @@ aimerneige:
 ```yaml
 key: TAkhjf8d1nlSlspN # api key
 limit: 10 # 每人每天访问次数上限
+admin:
+  - 1227427929 # 管理员帐号
 allowed: # 群白名单，在允许列表里才会提供服务
   - 1149558764
   - 857066811

@@ -19,6 +19,7 @@ var logger = utils.GetModuleLogger("com.aimerneige.weather")
 var weatherConfig struct {
 	Key       string  `json:"key"`
 	Limit     int     `json:"limit"`
+	Admin     []int64 `json:"admin"`
 	Allowed   []int64 `json:"allowed"`
 	BlackList []int64 `json:"blacklist"`
 	WhiteList []int64 `json:"whitelist"`
