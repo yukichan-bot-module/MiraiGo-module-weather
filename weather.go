@@ -66,7 +66,10 @@ func (w *weather) Init() {
 	if err := yaml.Unmarshal(bytes, &weatherConfig); err != nil {
 		logger.WithError(err).Errorf("Unable to read config file in %s", path)
 	}
-	// update config
+	service.UpdateLimit(weatherConfig.Limit)
+	service.UpdateAPIKey(weatherConfig.Key)
+	service.UpdateAdminList(weatherConfig.Admin)
+	service.UpdateWhiteList(weatherConfig.WhiteList)
 }
 
 // PostInit 第二次初始化
