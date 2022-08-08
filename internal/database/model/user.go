@@ -5,10 +5,9 @@ import "gorm.io/gorm"
 // User 用户
 type User struct {
 	gorm.Model
+	Uin       int64 `gorm:"unique_index"`
 	Name      string
-	Uin       int64
 	Longitude float64
 	Latitude  float64
-	Date      string // 最后调用日期 220801
-	Times     int    // 调用次数
+	Times     int // 调用次数
 }
