@@ -6,11 +6,13 @@ import (
 	"strconv"
 	"strings"
 
+	"github.com/Mrs4s/MiraiGo/message"
 	"github.com/yukichan-bot-module/MiraiGo-module-weather/internal/database"
 	"github.com/yukichan-bot-module/MiraiGo-module-weather/internal/weather"
 	"gorm.io/gorm"
 )
 
+// DatabaseErrorMessage 数据库错误信息
 const DatabaseErrorMessage string = "数据库错误，请联系开发者修 bug。开源地址：https://github.com/yukichan-bot-module/MiraiGo-module-weather"
 
 var limit int = 3
@@ -38,52 +40,53 @@ func UpdateAdminList(list []int64) {
 	adminList = list
 }
 
-func PrivateWeatherService(uin int64, msg string) string {
+// PrivateWeatherService 私聊服务
+func PrivateWeatherService(sender *message.Sender, msg string) string {
 	if strings.HasPrefix(msg, "修改地址 ") {
-		return updateLocation(uin, msg)
+		return updateLocation(sender, msg)
 	}
 	switch msg {
 	case "实时天气":
-		return getRealTimeWeather(uin)
+		return getRealTimeWeather(sender.Uin)
 	case "出门建议":
-		return ":TODO"
+		return "这个功能还没有开发呢。"
 	case "明天天气":
-		return "TODO"
+		return "这个功能还没有开发呢。"
 	}
 	return ""
 }
 
-func GroupWeatherService(uin int64, msg string) string {
-	if strings.HasPrefix(msg, ".weather.") && isAdmin(uin) {
+// GroupWeatherService 群聊服务
+func GroupWeatherService(sender *message.Sender, msg string) string {
+	if strings.HasPrefix(msg, ".weather.") && isAdmin(sender.Uin) {
 		switch {
 		case strings.HasPrefix(msg, ".weather.clear.times "):
-			return clearUserTimes(uin, msg)
+			return clearUserTimes(sender.Uin, msg)
 		case strings.HasPrefix(msg, ".weather.blacklist.add "):
-			return addUserToBlacklist(uin, msg)
+			return addUserToBlacklist(sender.Uin, msg)
 		case strings.HasPrefix(msg, ".weather.whitelist.add "):
-			return addUserToWhitelist(uin, msg)
+			return addUserToWhitelist(sender.Uin, msg)
 		case strings.HasPrefix(msg, ".weather.allowed "):
-			return addGroupToAllowed(uin, msg)
+			return addGroupToAllowed(sender.Uin, msg)
 		default:
 			return ""
 		}
 	}
 	if strings.HasPrefix(msg, "修改地址 ") {
-		return updateLocation(uin, msg)
+		return updateLocation(sender, msg)
 	}
 	switch msg {
 	case "实时天气":
-		return getRealTimeWeather(uin)
+		return getRealTimeWeather(sender.Uin)
 	case "出门建议":
-		return "TODO"
+		return "这个功能还没有开发呢。"
 	case "明天天气":
-		return "TODO"
+		return "这个功能还没有开发呢。"
 	}
-
 	return ""
 }
 
-func updateLocation(uin int64, msg string) string {
+func updateLocation(sender *message.Sender, msg string) string {
 	parts := strings.Split(msg, " ")
 	if len(parts) != 3 {
 		return "解析失败，请检查格式。正确的格式：「修改地址 经度 纬度」，示例：「修改地址 101.6656 39.2072」。"
@@ -107,9 +110,9 @@ func updateLocation(uin int64, msg string) string {
 	}
 	log.Println("经纬度", longitude, latitude)
 	dbService := NewDBService(database.GetDB())
-	_, err = dbService.GetUser(uin)
+	_, err = dbService.GetUser(sender.Uin)
 	if err == gorm.ErrRecordNotFound {
-		if err = dbService.CreateUser(uin, "", longitude, latitude); err != nil {
+		if err = dbService.CreateUser(sender.Uin, sender.Nickname, longitude, latitude); err != nil {
 			log.Println("Fail to create user.", err)
 			return DatabaseErrorMessage
 		}
@@ -119,7 +122,7 @@ func updateLocation(uin int64, msg string) string {
 		log.Println("Fail to get user.")
 		return DatabaseErrorMessage
 	}
-	if err := dbService.UpdateUserInfo(uin, "", longitude, latitude); err != nil {
+	if err := dbService.UpdateUserInfo(sender.Uin, sender.Nickname, longitude, latitude); err != nil {
 		log.Print("Fail to update user.")
 		return DatabaseErrorMessage
 	}
@@ -131,7 +134,7 @@ func getRealTimeWeather(uin int64) string {
 	longitude, latitude, err := dbService.GetUserLocation(uin)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return "未查询到地址信息，可通过群聊或私聊发送「修改地址 经度 纬度」来添加地址信息，经纬度信息需保留四位小数以上。发送后数据会被保存，如需修改使用同样的指令即可。"
+			return "未查询到地址信息，可通过群聊或私聊发送「修改地址 经度 纬度」来添加地址信息，经纬度信息需保留四位小数以上。示例：「修改地址 101.6656 39.2072」。发送后数据会被保存，如需修改使用同样的指令即可。"
 		}
 		log.Println("Fail to get user location.")
 		return DatabaseErrorMessage
@@ -159,19 +162,19 @@ func getRealTimeWeather(uin int64) string {
 }
 
 func clearUserTimes(uin int64, msg string) string {
-	return "TODO"
+	return "这个功能还没有开发呢。"
 }
 
 func addUserToBlacklist(uin int64, msg string) string {
-	return "TODO"
+	return "这个功能还没有开发呢。"
 }
 
 func addUserToWhitelist(uin int64, msg string) string {
-	return "TODO"
+	return "这个功能还没有开发呢。"
 }
 
 func addGroupToAllowed(uin int64, msg string) string {
-	return "TODO"
+	return "这个功能还没有开发呢。"
 }
 
 func isAdmin(uin int64) bool {

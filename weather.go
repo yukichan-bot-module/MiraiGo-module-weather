@@ -103,13 +103,17 @@ func (w *weather) PostInit() {
 // Serve 注册服务函数部分
 func (w *weather) Serve(b *bot.Bot) {
 	b.OnGroupMessage(func(c *client.QQClient, msg *message.GroupMessage) {
+		// 忽略匿名消息
+		if msg.Sender.IsAnonymous() {
+			return
+		}
 		if inBlacklist(msg.Sender.Uin) {
 			return
 		}
 		if !isAllowedGroup(msg.GroupCode) {
 			return
 		}
-		replyMsgString := service.GroupWeatherService(msg.Sender.Uin, msg.ToString())
+		replyMsgString := service.GroupWeatherService(msg.Sender, msg.ToString())
 		if replyMsgString == "" {
 			return
 		}
@@ -120,7 +124,7 @@ func (w *weather) Serve(b *bot.Bot) {
 		if inBlacklist(msg.Sender.Uin) {
 			return
 		}
-		replyMsgString := service.PrivateWeatherService(msg.Sender.Uin, msg.ToString())
+		replyMsgString := service.PrivateWeatherService(msg.Sender, msg.ToString())
 		if replyMsgString == "" {
 			return
 		}
