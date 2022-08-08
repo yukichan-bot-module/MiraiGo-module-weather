@@ -1,0 +1,6 @@
+cmd/
+config/
+db/
+logs/
+device.json
+session.token
