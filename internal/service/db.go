@@ -28,6 +28,20 @@ func (d *DBService) CreateUser(uin int64, name string, longitude float64, latitu
 	}).Error
 }
 
+// GetUser 获取用户
+func (d *DBService) GetUser(uin int64) (model.User, error) {
+	var user model.User
+	err := d.db.Where("uin = ?", uin).First(&user).Error
+	return user, err
+}
+
+// GetUserLocation 获取用户位置
+func (d *DBService) GetUserLocation(uin int64) (float64, float64, error) {
+	var user model.User
+	err := d.db.Select("longitude", "latitude").Where("uin = ?", uin).First(&user).Error
+	return user.Longitude, user.Latitude, err
+}
+
 // GetUserTimes 获得用户的调用次数
 func (d *DBService) GetUserTimes(uin int64) (int, error) {
 	var user model.User
@@ -46,7 +60,7 @@ func (d *DBService) UpdateUserTimes(uin int64, times int) error {
 }
 
 // IncreaseUserTimes 增加用户调用次数
-func (d *DBService) IncreaseUserTimes(uin int64, times int) error {
+func (d *DBService) IncreaseUserTimes(uin int64) error {
 	return d.db.Model(&model.User{}).Where("uin = ?", uin).Update("times", gorm.Expr("times + 1")).Error
 }
 
