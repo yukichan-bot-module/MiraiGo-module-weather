@@ -28,6 +28,13 @@ func (d *DBService) CreateUser(uin int64, name string, longitude float64, latitu
 	}).Error
 }
 
+// GetUserTimes 获得用户的调用次数
+func (d *DBService) GetUserTimes(uin int64) (int, error) {
+	var user model.User
+	err := d.db.Select("times").Where("uin = ?", uin).First(&user).Error
+	return user.Times, err
+}
+
 // UpdateUserInfo 更新用户信息
 func (d *DBService) UpdateUserInfo(uin int64, name string, longitude float64, latitude float64) error {
 	return d.db.Model(&model.User{}).Where("uin = ?", uin).Update("name", name).Update("longitude", longitude).Update("latitude", latitude).Error
@@ -43,7 +50,12 @@ func (d *DBService) IncreaseUserTimes(uin int64, times int) error {
 	return d.db.Model(&model.User{}).Where("uin = ?", uin).Update("times", gorm.Expr("times + 1")).Error
 }
 
-// ClearUserTimes 清空用户调用次数（不更新日期）
+// ClearUserTimes 清空用户调用次数
 func (d *DBService) ClearUserTimes(uin int64) error {
 	return d.db.Model(&model.User{}).Where("uin = ?", uin).Update("times", 0).Error
+}
+
+// ClearAllUserTimes 清空全部用户调用次数
+func (d *DBService) ClearAllUserTimes() error {
+	return d.db.Model(&model.User{}).Update("times", 0).Error
 }
