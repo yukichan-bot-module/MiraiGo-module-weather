@@ -6,7 +6,7 @@ import (
 	"net/http"
 )
 
-// HTTPGetRequest send a http get request
+// HTTPGetRequest 发送 HTTP GET 请求
 func HTTPGetRequest(url string, queryList [][]string) ([]byte, error) {
 	client := &http.Client{}
 	req, err := http.NewRequest("GET", url, nil)
