@@ -107,6 +107,9 @@ func (w *weather) Serve(b *bot.Bot) {
 			return
 		}
 		replyMsgString := service.GroupWeatherService(msg.Sender.Uin, msg.ToString())
+		if replyMsgString == "" {
+			return
+		}
 		replyMsg := message.NewSendingMessage().Append(message.NewText(replyMsgString))
 		c.SendGroupMessage(msg.GroupCode, replyMsg)
 	})
@@ -115,6 +118,9 @@ func (w *weather) Serve(b *bot.Bot) {
 			return
 		}
 		replyMsgString := service.PrivateWeatherService(msg.Sender.Uin, msg.ToString())
+		if replyMsgString == "" {
+			return
+		}
 		replyMsg := message.NewSendingMessage().Append(message.NewText(replyMsgString))
 		c.SendPrivateMessage(msg.Sender.Uin, replyMsg)
 	})
