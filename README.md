@@ -12,7 +12,7 @@ Module for [MiraiGo-Template](https://github.com/Logiase/MiraiGo-Template)
 
 ## 管理员指令
 
-- `.weather.clear.times <uin>` 清空用户 uin
+- `.weather.clear.times <uin>` 清空用户调用次数
 - `.weather.blacklist.add <uin>` 添加用户到黑名单
 - `.weather.whitelist.add <uin>` 添加用户到白名单
 - `.weather.allowed` 添加群到许可名单
