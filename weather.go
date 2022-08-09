@@ -338,15 +338,6 @@ func isAdmin(uin int64) bool {
 	return false
 }
 
-// func inWhitelist(uin int64) bool {
-// 	for _, v := range whitelist {
-// 		if v == uin {
-// 			return true
-// 		}
-// 	}
-// 	return false
-// }
-
 func isAllowedGroup(id int64) bool {
 	for _, groupID := range weatherConfig.Allowed {
 		if id == groupID {
