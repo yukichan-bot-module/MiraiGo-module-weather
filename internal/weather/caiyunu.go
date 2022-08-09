@@ -54,7 +54,7 @@ func (c *Caiyun) RealTime(longitude, latitude float64) (string, error) {
 	dswrf := fmt.Sprintf("向下短波辐射通量(W/M2) %.2f\n", realTime.Dswrf)
 	windSpeed := fmt.Sprintf("当前风速 %.2f km/hr\n", realTime.Wind.Speed)
 	windDirection := fmt.Sprintf("当前风向 %.2f° %s\n", realTime.Wind.Direction, windDirectionParse(realTime.Wind.Direction))
-	presure := fmt.Sprintf("地面气压 %.2f Pa\n", realTime.Pressure)
+	pressure := fmt.Sprintf("地面气压 %.2f Pa\n", realTime.Pressure)
 	apparentTemperature := fmt.Sprintf("体感温度 %.2f ℃\n", realTime.ApparentTemperature)
 	intensity := fmt.Sprintf("本地降水强度 %.2f mm/hr\n", realTime.Precipitation.Local.Intensity)
 	pm25 := fmt.Sprintf("PM25 浓度 %d μg/m3\n", realTime.AirQuality.PM25)
@@ -70,7 +70,7 @@ func (c *Caiyun) RealTime(longitude, latitude float64) (string, error) {
 	comfort := fmt.Sprintf("舒适度 %s\n", realTime.LifeIndex.Comfortable.Description)
 	origin := "信息来源：彩云天气"
 	result := temperature + humidity + skycon + visibility + dswrf + windSpeed + windDirection +
-		presure + apparentTemperature + intensity + airQuality + ultraviolet + comfort + origin
+		pressure + apparentTemperature + intensity + airQuality + ultraviolet + comfort + origin
 	return result, nil
 }
 
