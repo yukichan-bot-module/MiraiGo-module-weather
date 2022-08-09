@@ -107,9 +107,11 @@ func (w *weather) Serve(b *bot.Bot) {
 		if msg.Sender.IsAnonymous() {
 			return
 		}
+		// 忽略黑名单用户
 		if inBlacklist(msg.Sender.Uin) {
 			return
 		}
+		// 忽略未开启功能的群组
 		if !isAllowedGroup(msg.GroupCode) {
 			return
 		}
