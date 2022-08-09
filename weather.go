@@ -193,13 +193,14 @@ func privateWeatherService(sender *message.Sender, msg string) string {
 	if strings.HasPrefix(msg, "修改地址 ") {
 		return updateLocation(sender, msg)
 	}
+	caiyunAPI := service.NewCaiyun(weatherConfig.Key)
 	switch msg {
 	case "实时天气":
-		return getRealTimeWeather(sender.Uin)
+		return callWeatherAPI(sender.Uin, caiyunAPI.RealTime)
 	case "出门建议":
-		return "这个功能还没有开发呢。"
+		return callWeatherAPI(sender.Uin, caiyunAPI.Rain)
 	case "明天天气":
-		return "这个功能还没有开发呢。"
+		return callWeatherAPI(sender.Uin, caiyunAPI.Tomorrow)
 	}
 	return ""
 }
@@ -223,17 +224,19 @@ func groupWeatherService(sender *message.Sender, msg string) string {
 	if strings.HasPrefix(msg, "修改地址 ") {
 		return updateLocation(sender, msg)
 	}
+	caiyunAPI := service.NewCaiyun(weatherConfig.Key)
 	switch msg {
 	case "实时天气":
-		return getRealTimeWeather(sender.Uin)
+		return callWeatherAPI(sender.Uin, caiyunAPI.RealTime)
 	case "出门建议":
-		return "这个功能还没有开发呢。"
+		return callWeatherAPI(sender.Uin, caiyunAPI.Rain)
 	case "明天天气":
-		return "这个功能还没有开发呢。"
+		return callWeatherAPI(sender.Uin, caiyunAPI.Tomorrow)
 	}
 	return ""
 }
 
+// updateLocation 更新用户地址
 func updateLocation(sender *message.Sender, msg string) string {
 	parts := strings.Split(msg, " ")
 	if len(parts) != 3 {
@@ -277,12 +280,12 @@ func updateLocation(sender *message.Sender, msg string) string {
 	return "保存成功。"
 }
 
-func getRealTimeWeather(uin int64) string {
+func callWeatherAPI(uin int64, apiCalled func(float64, float64) (string, error)) string {
 	dbService := service.NewDBService(database.GetDB())
 	longitude, latitude, err := dbService.GetUserLocation(uin)
 	if err != nil {
 		if err == gorm.ErrRecordNotFound {
-			return "未查询到地址信息，可通过群聊或私聊发送「修改地址 经度 纬度」来添加地址信息，经纬度信息需保留四位小数以上。示例：「修改地址 101.6656 39.2072」。发送后数据会被保存，如需修改使用同样的指令即可。"
+			return "未查询到地址信息，可通过群聊或私聊发送「修改地址 经度 纬度」来添加地址信息，经纬度信息需保留四位小数以上以保证精确度。示例：「修改地址 101.6656 39.2072」。发送后数据会被保存，如需修改使用同样的指令即可。\n\n注：不支持城市，因为城市准确度很差。本 bot 使用的 api 为付费 api，请勿滥用。"
 		}
 		log.Println("Fail to get user location.")
 		return DatabaseErrorMessage
@@ -301,31 +304,34 @@ func getRealTimeWeather(uin int64) string {
 		log.Println("Fail to increase user times")
 		return DatabaseErrorMessage
 	}
-	caiyun := service.NewCaiyun(weatherConfig.Key)
-	rtWeather, err := caiyun.RealTime(longitude, latitude)
+	apiResponse, err := apiCalled(longitude, latitude)
 	if err != nil {
 		return "调用天气 api 时发生错误。可能是网络问题或 api 使用次数耗尽。"
 	}
-	return rtWeather
+	return apiResponse
 }
 
 // clearUserTimes 清除用户调用次数
 func clearUserTimes(uin int64, msg string) string {
+	// TODO
 	return "这个功能还没有开发呢。"
 }
 
 // addUserToBlacklist 添加用户到黑名单
 func addUserToBlacklist(uin int64, msg string) string {
+	// TODO
 	return "这个功能还没有开发呢。"
 }
 
 // addUserToWhitelist 添加用户到白名单
 func addUserToWhitelist(uin int64, msg string) string {
+	// TODO
 	return "这个功能还没有开发呢。"
 }
 
 // addGroupToAllowed 添加群组到许可名单
 func addGroupToAllowed(uin int64, msg string) string {
+	// TODO
 	return "这个功能还没有开发呢。"
 }
 
