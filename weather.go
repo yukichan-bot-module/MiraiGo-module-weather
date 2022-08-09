@@ -37,6 +37,12 @@ var weatherConfig struct {
 			Path string `json:"path"`
 		} `json:"sqlite"`
 	} `json:"db"`
+	Daily []struct {
+		Group     string  `json:"group"`
+		Longitude float64 `json:"longitude"`
+		Latitude  float64 `json:"latitude"`
+		Time      string  `json:"time"`
+	} `json:"daily"`
 }
 
 type weather struct {

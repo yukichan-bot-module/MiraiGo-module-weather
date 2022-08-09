@@ -69,6 +69,15 @@ db:
     charset: utf8mb4
   sqlite:
     path: "./db/weather.db"
+daily:
+  - group: 857066811 # 群
+    longitude: 116.407526 # 经度
+    latitude: 39.90403 # 纬度
+    time: 00:00 # 时间 (UTC 时区)
+  - group: 328521977
+    longitude: 116.407526
+    latitude: 39.90403
+    time: 00:00
 ```
 
 ## LICENSE
