@@ -5,6 +5,7 @@ go 1.17
 require (
 	github.com/Logiase/MiraiGo-Template v0.0.0-20220412065005-27063e73adf8
 	github.com/Mrs4s/MiraiGo v0.0.0-20211225150059-9946b404aea3
+	github.com/go-co-op/gocron v1.16.2
 	gopkg.in/yaml.v3 v3.0.1
 	gorm.io/driver/mysql v1.3.5
 	gorm.io/driver/sqlite v1.3.6
@@ -46,6 +47,7 @@ require (
 	github.com/pierrec/lz4/v4 v4.1.12 // indirect
 	github.com/pkg/errors v0.9.1 // indirect
 	github.com/rifflock/lfshook v0.0.0-20180920164130-b9218ef580f5 // indirect
+	github.com/robfig/cron/v3 v3.0.1 // indirect
 	github.com/sirupsen/logrus v1.8.1 // indirect
 	github.com/skip2/go-qrcode v0.0.0-20200617195104-da1b6568686e // indirect
 	github.com/spf13/afero v1.7.0 // indirect
@@ -53,7 +55,6 @@ require (
 	github.com/spf13/jwalterweatherman v1.1.0 // indirect
 	github.com/spf13/pflag v1.0.5 // indirect
 	github.com/spf13/viper v1.10.1 // indirect
-	github.com/stretchr/testify v1.8.0 // indirect
 	github.com/subosito/gotenv v1.2.0 // indirect
 	github.com/tidwall/gjson v1.12.1 // indirect
 	github.com/tidwall/match v1.1.1 // indirect

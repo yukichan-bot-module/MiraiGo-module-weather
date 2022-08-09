@@ -2,12 +2,14 @@ package weather
 
 import (
 	"sync"
+	"time"
 
 	"github.com/Logiase/MiraiGo-Template/bot"
 	"github.com/Logiase/MiraiGo-Template/config"
 	"github.com/Logiase/MiraiGo-Template/utils"
 	"github.com/Mrs4s/MiraiGo/client"
 	"github.com/Mrs4s/MiraiGo/message"
+	"github.com/go-co-op/gocron"
 	"github.com/yukichan-bot-module/MiraiGo-module-weather/internal/database"
 	"github.com/yukichan-bot-module/MiraiGo-module-weather/internal/service"
 	"gopkg.in/yaml.v3"
@@ -139,6 +141,19 @@ func (w *weather) Serve(b *bot.Bot) {
 		replyMsg := message.NewSendingMessage().Append(message.NewText(replyMsgString))
 		c.SendPrivateMessage(msg.Sender.Uin, replyMsg)
 	})
+	s := gocron.NewScheduler(time.UTC)
+	s.Every(1).Day().At("00:00").Do(func() {
+		dbService := service.NewDBService(database.GetDB())
+		err := dbService.ClearAllUserTimes()
+		if err != nil {
+			logger.WithError(err).Errorf("Fail to clear user times.")
+			for i := 0; i < 3 && err != nil; i++ {
+				err = dbService.ClearAllUserTimes()
+				logger.WithError(err).Errorf("Fail to clear user times. The %d times to retry.", i)
+			}
+		}
+	})
+	s.StartAsync()
 }
 
 // Start 此函数会新开携程进行调用
