@@ -99,7 +99,7 @@ func (c *Caiyun) Rain(longitude, latitude float64) (string, error) {
 	for _, v := range minutely.Probability {
 		probability += fmt.Sprintf(" %.2f", v*100)
 	}
-	probability += "/n"
+	probability += "\n"
 	description := minutely.Description + "\n"
 	source := "数据来源：彩云天气"
 	result := probability + description + source
