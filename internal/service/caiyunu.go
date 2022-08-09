@@ -156,6 +156,347 @@ type CaiyunAPIRealTimeResponse struct {
 	} `json:"result"`
 }
 
+type CaiyunAPIMinutelyResponse struct {
+	Status     string    `json:"status"`
+	APIVersion string    `json:"api_version"`
+	APIStatus  string    `json:"api_status"`
+	Lang       string    `json:"lang"`
+	Unit       string    `json:"unit"`
+	Tzshift    int       `json:"tzshift"`
+	Timezone   string    `json:"timezone"`
+	ServerTime int       `json:"server_time"`
+	Location   []float64 `json:"location"`
+	Result     struct {
+		Minutely struct {
+			Status          string    `json:"status"`
+			Datasource      string    `json:"datasource"`
+			Precipitation2H []float64 `json:"precipitation_2h"`
+			Precipitation   []float64 `json:"precipitation"`
+			Probability     []float64 `json:"probability"`
+			Description     string    `json:"description"`
+		} `json:"minutely"`
+		Primary          int    `json:"primary"`
+		ForecastKeypoint string `json:"forecast_keypoint"`
+	} `json:"result"`
+}
+
+type CaiyunAPIHourlyResponse struct {
+	Status     string    `json:"status"`
+	APIVersion string    `json:"api_version"`
+	APIStatus  string    `json:"api_status"`
+	Lang       string    `json:"lang"`
+	Unit       string    `json:"unit"`
+	Tzshift    int       `json:"tzshift"`
+	Timezone   string    `json:"timezone"`
+	ServerTime int       `json:"server_time"`
+	Location   []float64 `json:"location"`
+	Result     struct {
+		Hourly struct {
+			Status        string `json:"status"`
+			Description   string `json:"description"`
+			Precipitation []struct {
+				Datetime    string  `json:"datetime"`
+				Value       float64 `json:"value"`
+				Probability int     `json:"probability"`
+			} `json:"precipitation"`
+			Temperature []struct {
+				Datetime string  `json:"datetime"`
+				Value    float64 `json:"value"`
+			} `json:"temperature"`
+			ApparentTemperature []struct {
+				Datetime string  `json:"datetime"`
+				Value    float64 `json:"value"`
+			} `json:"apparent_temperature"`
+			Wind []struct {
+				Datetime  string  `json:"datetime"`
+				Speed     float64 `json:"speed"`
+				Direction float64 `json:"direction"`
+			} `json:"wind"`
+			Humidity []struct {
+				Datetime string  `json:"datetime"`
+				Value    float64 `json:"value"`
+			} `json:"humidity"`
+			Cloudrate []struct {
+				Datetime string  `json:"datetime"`
+				Value    float64 `json:"value"`
+			} `json:"cloudrate"`
+			Skycon []struct {
+				Datetime string `json:"datetime"`
+				Value    string `json:"value"`
+			} `json:"skycon"`
+			Pressure []struct {
+				Datetime string  `json:"datetime"`
+				Value    float64 `json:"value"`
+			} `json:"pressure"`
+			Visibility []struct {
+				Datetime string  `json:"datetime"`
+				Value    float64 `json:"value"`
+			} `json:"visibility"`
+			Dswrf []struct {
+				Datetime string  `json:"datetime"`
+				Value    float64 `json:"value"`
+			} `json:"dswrf"`
+			AirQuality struct {
+				Aqi []struct {
+					Datetime string `json:"datetime"`
+					Value    struct {
+						Chn int `json:"chn"`
+						Usa int `json:"usa"`
+					} `json:"value"`
+				} `json:"aqi"`
+				Pm25 []struct {
+					Datetime string `json:"datetime"`
+					Value    int    `json:"value"`
+				} `json:"pm25"`
+			} `json:"air_quality"`
+		} `json:"hourly"`
+		Primary          int    `json:"primary"`
+		ForecastKeypoint string `json:"forecast_keypoint"`
+	} `json:"result"`
+}
+
+type CaiyunAPIDayilyResponse struct {
+	Status     string     `json:"status"`
+	APIVersion string     `json:"api_version"`
+	APIStatus  string     `json:"api_status"`
+	Language   string     `json:"lang"`
+	Unit       string     `json:"unit"`
+	TZShift    int        `json:"tzshift"`
+	Timezone   string     `json:"timezone"`
+	ServerTime int64      `json:"server_time"`
+	Location   [2]float64 `json:"location"`
+	Result     struct {
+		Daily struct {
+			Status string `json:"status"`
+			Astro  []struct {
+				Date    string `json:"date"`
+				Sunrise struct {
+					Time string `json:"time"`
+				} `json:"sunrise"`
+				Sunset struct {
+					Time string `json:"time"`
+				} `json:"sunset"`
+			} `json:"astro"` // 日出日落时间，当地时区的时刻 (tzshift 不作用在这个变量)
+			Precipitation08H20H []struct {
+				Date        string  `json:"date"`
+				Max         float64 `json:"max"`
+				Min         float64 `json:"min"`
+				Avg         float64 `json:"avg"`
+				Probability int     `json:"probability"`
+			} `json:"precipitation_08h_20h"` // 白天降水数据
+			Precipitation20H32H []struct {
+				Date        string  `json:"date"`
+				Max         float64 `json:"max"`
+				Min         float64 `json:"min"`
+				Avg         float64 `json:"avg"`
+				Probability int     `json:"probability"`
+			} `json:"precipitation_20h_32h"` // 夜晚降水数据
+			Precipitation []struct {
+				Date        string  `json:"date"`
+				Max         float64 `json:"max"`
+				Min         float64 `json:"min"`
+				Avg         float64 `json:"avg"`
+				Probability int     `json:"probability"`
+			} `json:"precipitation"` // 降水数据
+			Temperature []struct {
+				Date string  `json:"date"`
+				Max  float64 `json:"max"`
+				Min  float64 `json:"min"`
+				Avg  float64 `json:"avg"`
+			} `json:"temperature"` // 全天地表 2 米气温
+			Temperature08H20H []struct {
+				Date string  `json:"date"`
+				Max  float64 `json:"max"`
+				Min  float64 `json:"min"`
+				Avg  float64 `json:"avg"`
+			} `json:"temperature_08h_20h"` // 白天地表 2 米气温
+			Temperature20H32H []struct {
+				Date string  `json:"date"`
+				Max  float64 `json:"max"`
+				Min  float64 `json:"min"`
+				Avg  float64 `json:"avg"`
+			} `json:"temperature_20h_32h"` // 夜晚地表 2 米气温
+			Wind []struct {
+				Date string `json:"date"`
+				Max  struct {
+					Speed     float64 `json:"speed"`
+					Direction float64 `json:"direction"`
+				} `json:"max"`
+				Min struct {
+					Speed     float64 `json:"speed"`
+					Direction float64 `json:"direction"`
+				} `json:"min"`
+				Avg struct {
+					Speed     float64 `json:"speed"`
+					Direction float64 `json:"direction"`
+				} `json:"avg"`
+			} `json:"wind"` // 全天地表 10 米风速
+			Wind08H20H []struct {
+				Date string `json:"date"`
+				Max  struct {
+					Speed     float64 `json:"speed"`
+					Direction float64 `json:"direction"`
+				} `json:"max"`
+				Min struct {
+					Speed     float64 `json:"speed"`
+					Direction float64 `json:"direction"`
+				} `json:"min"`
+				Avg struct {
+					Speed     float64 `json:"speed"`
+					Direction float64 `json:"direction"`
+				} `json:"avg"`
+			} `json:"wind_08h_20h"` // 白天地表 10 米风速
+			Wind20H32H []struct {
+				Date string `json:"date"`
+				Max  struct {
+					Speed     float64 `json:"speed"`
+					Direction float64 `json:"direction"`
+				} `json:"max"`
+				Min struct {
+					Speed     float64 `json:"speed"`
+					Direction float64 `json:"direction"`
+				} `json:"min"`
+				Avg struct {
+					Speed     float64 `json:"speed"`
+					Direction float64 `json:"direction"`
+				} `json:"avg"`
+			} `json:"wind_20h_32h"` // 夜晚地表 10 米风速
+			Humidity []struct {
+				Date string  `json:"date"`
+				Max  float64 `json:"max"`
+				Min  float64 `json:"min"`
+				Avg  float64 `json:"avg"`
+			} `json:"humidity"` // 地表 2 米相对湿度(%)
+			Cloudrate []struct {
+				Date string  `json:"date"`
+				Max  float64 `json:"max"`
+				Min  float64 `json:"min"`
+				Avg  float64 `json:"avg"`
+			} `json:"cloudrate"` // 云量(0.0-1.0)
+			Pressure []struct {
+				Date string  `json:"date"`
+				Max  float64 `json:"max"`
+				Min  float64 `json:"min"`
+				Avg  float64 `json:"avg"`
+			} `json:"pressure"` // 地面气压
+			Visibility []struct {
+				Date string  `json:"date"`
+				Max  float64 `json:"max"`
+				Min  float64 `json:"min"`
+				Avg  float64 `json:"avg"`
+			} `json:"visibility"` // 地表水平能见度
+			Dswrf []struct {
+				Date string  `json:"date"`
+				Max  float64 `json:"max"`
+				Min  float64 `json:"min"`
+				Avg  float64 `json:"avg"`
+			} `json:"dswrf"` // 向下短波辐射通量(W/M2)
+			AirQuality struct {
+				Aqi []struct {
+					Date string `json:"date"`
+					Max  struct {
+						Chn int `json:"chn"`
+						Usa int `json:"usa"`
+					} `json:"max"`
+					Avg struct {
+						Chn int `json:"chn"`
+						Usa int `json:"usa"`
+					} `json:"avg"`
+					Min struct {
+						Chn int `json:"chn"`
+						Usa int `json:"usa"`
+					} `json:"min"`
+				} `json:"aqi"` // 国标 AQI
+				Pm25 []struct {
+					Date string `json:"date"`
+					Max  int    `json:"max"`
+					Avg  int    `json:"avg"`
+					Min  int    `json:"min"`
+				} `json:"pm25"` // PM2.5 浓度(μg/m3)
+			} `json:"air_quality"`
+			Skycon []struct {
+				Date  string `json:"date"`
+				Value string `json:"value"`
+			} `json:"skycon"` // 全天主要 天气现象
+			Skycon08H20H []struct {
+				Date  string `json:"date"`
+				Value string `json:"value"`
+			} `json:"skycon_08h_20h"` // 白天主要 天气现象
+			Skycon20H32H []struct {
+				Date  string `json:"date"`
+				Value string `json:"value"`
+			} `json:"skycon_20h_32h"` // 夜晚主要 天气现象
+			LifeIndex struct {
+				Ultraviolet []struct {
+					Date        string `json:"date"`
+					Index       string `json:"index"`
+					Description string `json:"desc"` // 紫外线指数自然语言
+				} `json:"ultraviolet"`
+				CarWashing []struct {
+					Date        string `json:"date"`
+					Index       string `json:"index"`
+					Description string `json:"desc"` // 洗车指数自然语言
+				} `json:"carWashing"`
+				Dressing []struct {
+					Date        string `json:"date"`
+					Index       string `json:"index"`
+					Description string `json:"desc"` // 穿衣指数自然语言
+				} `json:"dressing"`
+				Comfort []struct {
+					Date        string `json:"date"`
+					Index       string `json:"index"`
+					Description string `json:"desc"` // 舒适度指数自然语言
+				} `json:"comfort"`
+				ColdRisk []struct {
+					Date        string `json:"date"`
+					Index       string `json:"index"`
+					Description string `json:"desc"` // 感冒指数自然语言
+				} `json:"coldRisk"`
+			} `json:"life_index"`
+		} `json:"daily"`
+		Primary int `json:"primary"`
+	} `json:"result"`
+}
+
+type CaiyunAPIAlertResponse struct {
+	Status     string     `json:"status"`
+	APIVersion string     `json:"api_version"`
+	APIStatus  string     `json:"api_status"`
+	Lang       string     `json:"lang"`
+	Unit       string     `json:"unit"`
+	Tzshift    int        `json:"tzshift"`
+	Timezone   string     `json:"timezone"`
+	ServerTime int        `json:"server_time"`
+	Location   [2]float64 `json:"location"`
+	Result     struct {
+		Alert struct {
+			Status  string `json:"status"`
+			Content []struct {
+				Province      string     `json:"province"`    // 省，如"福建省"
+				Status        string     `json:"status"`      // 预警信息的状态，如"预警中"
+				Code          string     `json:"code"`        // 预警代码，如"0902"
+				Description   string     `json:"description"` // 描述，如"三明市气象台 2020 年 04 月 21 日 12 时 19 分继续发布雷电黄色预警信号：预计未来 6 小时我市有雷电活动，局地伴有短时强降水、6-8 级雷雨大风等强对流天气。请注意防范！"
+				RegionID      string     `json:"regionId"`
+				County        string     `json:"county"`       // 县，如"无"
+				Pubtimestamp  int        `json:"pubtimestamp"` // 发布时间，单位是 Unix 时间戳，如 1587443583
+				Latlon        [2]float64 `json:"latlon"`
+				City          string     `json:"city"`     // 市，如"三明市"
+				AlertID       string     `json:"alertId"`  // 预警 ID，如 "35040041600001_20200421123203"
+				Title         string     `json:"title"`    // 标题，如"三明市气象台发布雷电黄色预警[Ⅲ 级/较重]",
+				Adcode        string     `json:"adcode"`   // 区域代码，如 "350400"
+				Source        string     `json:"source"`   // 发布单位，如"国家预警信息发布中心",
+				Location      string     `json:"location"` // 位置，如"福建省三明市"
+				RequestStatus string     `json:"request_status"`
+			} `json:"content"`
+			Adcodes []struct {
+				Adcode int    `json:"adcode"`
+				Name   string `json:"name"`
+			} `json:"adcodes"` // 行政区划层级信息
+		} `json:"alert"`
+		Primary int `json:"primary"`
+	} `json:"result"`
+}
+
 // SkyconParse 天气现象解析
 func SkyconParse(skycon string) string {
 	var result string
