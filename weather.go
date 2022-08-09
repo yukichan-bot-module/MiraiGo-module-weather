@@ -153,6 +153,11 @@ func (w *weather) Serve(b *bot.Bot) {
 			}
 		}
 	})
+	for _, d := range weatherConfig.Daily {
+		s.Every(1).Day().At(d.Time).Do(func() {
+			// TODO
+		})
+	}
 	s.StartAsync()
 }
 
