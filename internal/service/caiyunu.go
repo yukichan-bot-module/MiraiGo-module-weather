@@ -35,17 +35,17 @@ func (c *Caiyun) RealTime(longitude, latitude float64) (string, error) {
 		{"lang", "zh_CN"},
 	})
 	if err != nil {
-		return "", err
+		return "网络错误", err
 	}
 	if err := json.Unmarshal(responseBody, &realtimeResponse); err != nil {
-		return "", err
+		return "json 解析错误", err
 	}
 	if realtimeResponse.Status != "ok" {
-		return "", fmt.Errorf("caiyun api error")
+		return "api 错误", fmt.Errorf("caiyun api error")
 	}
 	realTime := realtimeResponse.Result.RealTime
 	if realTime.Status != "ok" {
-		return "", fmt.Errorf("caiyun realtime error")
+		return "realtime api 错误", fmt.Errorf("caiyun realtime error")
 	}
 	temperature := fmt.Sprintf("地表气温 %.1f ℃\n", realTime.Temperature)
 	humidity := fmt.Sprintf("地表相对湿度 %.2f%%\n", realTime.Humidity*100)
@@ -76,14 +76,41 @@ func (c *Caiyun) RealTime(longitude, latitude float64) (string, error) {
 
 // Rain 短期内是否有雨
 func (c *Caiyun) Rain(longitude, latitude float64) (string, error) {
-	// TODO
-	return "TODO", nil
+	url := fmt.Sprintf("%s/%s/%s/%f,%f/minutely", CaiyunAPIUrl, CaiyunAPIVersion, c.APIKey, longitude, latitude)
+	var minutelyResponse CaiyunAPIMinutelyResponse
+	responseBody, err := pkg.HTTPGetRequest(url, [][]string{
+		{"unit", "metric:v2"},
+		{"lang", "zh_CN"},
+	})
+	if err != nil {
+		return "网络错误", err
+	}
+	if err := json.Unmarshal(responseBody, &minutelyResponse); err != nil {
+		return "json 解析错误", err
+	}
+	if minutelyResponse.Status != "ok" {
+		return "api 错误", err
+	}
+	minutely := minutelyResponse.Result.Minutely
+	if minutely.Status != "ok" {
+		return "minutely api 错误", err
+	}
+	probability := "未来两小时每半小时的降水概率："
+	for _, v := range minutely.Probability {
+		probability += fmt.Sprintf(" %.2f", v*100)
+	}
+	probability += "/n"
+	description := minutely.Description + "\n"
+	source := "数据来源：彩云天气"
+	result := probability + description + source
+
+	return result, nil
 }
 
 // Tomorrow 明天的天气
 func (c *Caiyun) Tomorrow(longitude, latitude float64) (string, error) {
 	// TODO
-	return "TODO", nil
+	return "这个功能还没有开发呢。", nil
 }
 
 // CaiyunAPIRealTimeResponse 实时天气情况返回
