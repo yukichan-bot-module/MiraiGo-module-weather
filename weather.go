@@ -43,7 +43,7 @@ type Config struct {
 		} `json:"sqlite"`
 	} `json:"db"`
 	Daily []struct {
-		Group     string  `json:"group"`
+		GroupCode int64   `json:"group"`
 		Longitude float64 `json:"longitude"`
 		Latitude  float64 `json:"latitude"`
 		Time      string  `json:"time"`
@@ -163,7 +163,21 @@ func (w *weather) Serve(b *bot.Bot) {
 	})
 	for _, d := range weatherConfig.Daily {
 		s.Every(1).Day().At(d.Time).Do(func() {
-			// TODO
+			caiyunAPI := service.NewCaiyun(weatherConfig.Key)
+			replyMsgString := ""
+			switch d.Type {
+			case "today":
+				replyMsgString, _ = caiyunAPI.Today(d.Longitude, d.Latitude)
+			case "tomorrow":
+				replyMsgString, _ = caiyunAPI.Tomorrow(d.Longitude, d.Latitude)
+			default:
+				replyMsgString = "配置文件错误，请检查"
+			}
+			if replyMsgString == "" {
+				return
+			}
+			msg := message.NewSendingMessage().Append(message.NewText(replyMsgString))
+			b.SendGroupMessage(d.GroupCode, msg)
 		})
 	}
 	s.StartAsync()
