@@ -69,8 +69,7 @@ func (c *Caiyun) RealTime(longitude, latitude float64) (string, error) {
 	ultraviolet := fmt.Sprintf("紫外线强度 %s\n", realTime.LifeIndex.Ultraviolet.Description)
 	comfort := fmt.Sprintf("舒适度 %s\n", realTime.LifeIndex.Comfortable.Description)
 	origin := "信息来源：彩云天气"
-	result := temperature + humidity + skycon + visibility + dswrf + windSpeed + windDirection +
-		pressure + apparentTemperature + intensity + airQuality + ultraviolet + comfort + origin
+	result := temperature + humidity + skycon + visibility + dswrf + windSpeed + windDirection + pressure + apparentTemperature + intensity + airQuality + ultraviolet + comfort + origin
 	return result, nil
 }
 
@@ -107,10 +106,61 @@ func (c *Caiyun) Rain(longitude, latitude float64) (string, error) {
 	return result, nil
 }
 
+// Today 今天的天气
+func (c *Caiyun) Today(longitude, latitude float64) (string, error) {
+	return c.getDayWeather(longitude, latitude, 0)
+}
+
 // Tomorrow 明天的天气
 func (c *Caiyun) Tomorrow(longitude, latitude float64) (string, error) {
-	// TODO
-	return "这个功能还没有开发呢。", nil
+	return c.getDayWeather(longitude, latitude, 1)
+}
+
+// getDayWeather 获取某一天的天气
+// 0 <= dayIndex < 15
+// 0 代表今天，1 代表明天，以此类推
+func (c *Caiyun) getDayWeather(longitude, latitude float64, dayIndex int) (string, error) {
+	url := fmt.Sprintf("%s/%s/%s/%f,%f/daily", CaiyunAPIUrl, CaiyunAPIVersion, c.APIKey, longitude, latitude)
+	var dailyResponse CaiyunAPIDailyResponse
+	responseBody, err := pkg.HTTPGetRequest(url, [][]string{
+		{"dailysteps", fmt.Sprint(dayIndex + 1)},
+		{"unit", "metric:v2"},
+		{"lang", "zh_CN"},
+	})
+	if err != nil {
+		return "网络错误", err
+	}
+	if err := json.Unmarshal(responseBody, &dailyResponse); err != nil {
+		return "json 解析错误", err
+	}
+	if dailyResponse.Status != "ok" {
+		return "api 错误", err
+	}
+	daily := dailyResponse.Result.Daily
+	if daily.Status != "ok" {
+		return "daily api 错误", err
+	}
+	temprature := fmt.Sprintf("全天气温(℃) %.1f ~ %.1f 平均 %.1f\n", daily.Temperature[dayIndex].Min, daily.Temperature[dayIndex].Max, daily.Temperature[dayIndex].Avg)
+	humidity := fmt.Sprintf("全天相对湿度 %0.1f%% ~ %0.1f%% 平均 %0.1f%%\n", daily.Humidity[dayIndex].Min, daily.Humidity[dayIndex].Max, daily.Humidity[dayIndex].Avg)
+	skycon := fmt.Sprintf("天气 %s\n", daily.Skycon[dayIndex].Value)
+	intensity := fmt.Sprintf("全天降水强度(mm/hr) %.2f ~ %.2f 平均 %.2f\n", daily.Precipitation[dayIndex].Min, daily.Precipitation[dayIndex].Max, daily.Precipitation[dayIndex].Avg)
+	probability := fmt.Sprintf("全天降水概率 %.0f%%\n", daily.Precipitation[dayIndex].Probability*100)
+	wind := fmt.Sprintf("全天风速(km/hr) %.2f ~ %.2f 平均 %.2f\n", daily.Wind[dayIndex].Min, daily.Wind[dayIndex].Max, daily.Wind[dayIndex].Avg)
+	pressure := fmt.Sprintf("全天地面气压(Pa) %.2f ~ %.2f 平均 %.2f\n", daily.Pressure[dayIndex].Min, daily.Pressure[dayIndex].Max, daily.Pressure[dayIndex].Avg)
+	visibility := fmt.Sprintf("全天地表水平能见度 %.1f ~ %.1f 平均 %.1f\n", daily.Visibility[dayIndex].Min, daily.Visibility[dayIndex].Max, daily.Visibility[dayIndex].Avg)
+	dswrf := fmt.Sprintf("全天向下短波辐射通量(W/M2) %.1f ~ %.1f 平均 %.1f\n", daily.Dswrf[dayIndex].Min, daily.Dswrf[dayIndex].Max, daily.Dswrf[dayIndex].Avg)
+	aqi := fmt.Sprintf("全天国标 AQI %d ~ %d 平均 %d\n", daily.AirQuality.Aqi[dayIndex].Min.Chn, daily.AirQuality.Aqi[dayIndex].Max.Chn, daily.AirQuality.Aqi[dayIndex].Avg.Chn)
+	pm25 := fmt.Sprintf("全天 PM2.5 浓度 %d ~ %d 平均 %d\n", daily.AirQuality.Pm25[dayIndex].Min, daily.AirQuality.Pm25[dayIndex].Max, daily.AirQuality.Pm25[dayIndex].Avg)
+	sunrise := fmt.Sprintf("日出 %s\n", daily.Astro[dayIndex].Sunrise.Time)
+	sunset := fmt.Sprintf("日落 %s\n", daily.Astro[dayIndex].Sunset.Time)
+	ultraviolet := fmt.Sprintf("紫外线强度 %s\n", daily.LifeIndex.Ultraviolet[dayIndex].Description)
+	carwashing := fmt.Sprintf("洗车指数 %s\n", daily.LifeIndex.CarWashing[dayIndex].Description)
+	dressing := fmt.Sprintf("穿衣指数 %s\n", daily.LifeIndex.Dressing[dayIndex].Description)
+	comfort := fmt.Sprintf("舒适指数 %s\n", daily.LifeIndex.Comfort[dayIndex].Description)
+	coldrisk := fmt.Sprintf("感冒指数 %s\n", daily.LifeIndex.ColdRisk[dayIndex].Description)
+	origin := "信息来源：彩云天气"
+	result := temprature + humidity + skycon + intensity + probability + wind + pressure + visibility + dswrf + aqi + pm25 + sunrise + sunset + ultraviolet + carwashing + dressing + comfort + coldrisk + origin
+	return result, nil
 }
 
 // CaiyunAPIRealTimeResponse 实时天气情况返回
@@ -183,6 +233,8 @@ type CaiyunAPIRealTimeResponse struct {
 	} `json:"result"`
 }
 
+// CaiyunAPIMinutelyResponse 分钟级预报返回
+// https://docs.caiyunapp.com/docs/minutely
 type CaiyunAPIMinutelyResponse struct {
 	Status     string    `json:"status"`
 	APIVersion string    `json:"api_version"`
@@ -207,6 +259,8 @@ type CaiyunAPIMinutelyResponse struct {
 	} `json:"result"`
 }
 
+// CaiyunAPIHourlyResponse 小时级别预报
+// https://docs.caiyunapp.com/docs/hourly
 type CaiyunAPIHourlyResponse struct {
 	Status     string    `json:"status"`
 	APIVersion string    `json:"api_version"`
@@ -282,7 +336,9 @@ type CaiyunAPIHourlyResponse struct {
 	} `json:"result"`
 }
 
-type CaiyunAPIDayilyResponse struct {
+// CaiyunAPIDailyResponse 天级别预报
+// https://docs.caiyunapp.com/docs/daily
+type CaiyunAPIDailyResponse struct {
 	Status     string     `json:"status"`
 	APIVersion string     `json:"api_version"`
 	APIStatus  string     `json:"api_status"`
@@ -323,7 +379,7 @@ type CaiyunAPIDayilyResponse struct {
 				Max         float64 `json:"max"`
 				Min         float64 `json:"min"`
 				Avg         float64 `json:"avg"`
-				Probability int     `json:"probability"`
+				Probability float64 `json:"probability"`
 			} `json:"precipitation"` // 降水数据
 			Temperature []struct {
 				Date string  `json:"date"`
@@ -485,6 +541,8 @@ type CaiyunAPIDayilyResponse struct {
 	} `json:"result"`
 }
 
+// CaiyunAPIAlertResponse 预警数据
+// https://docs.caiyunapp.com/docs/alert
 type CaiyunAPIAlertResponse struct {
 	Status     string     `json:"status"`
 	APIVersion string     `json:"api_version"`

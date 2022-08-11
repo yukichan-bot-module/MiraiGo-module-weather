@@ -199,6 +199,8 @@ func privateWeatherService(sender *message.Sender, msg string) string {
 		return callWeatherAPI(sender.Uin, caiyunAPI.RealTime)
 	case "出门建议":
 		return callWeatherAPI(sender.Uin, caiyunAPI.Rain)
+	case "今天天气":
+		return callWeatherAPI(sender.Uin, caiyunAPI.Today)
 	case "明天天气":
 		return callWeatherAPI(sender.Uin, caiyunAPI.Tomorrow)
 	}
@@ -230,6 +232,8 @@ func groupWeatherService(sender *message.Sender, msg string) string {
 		return callWeatherAPI(sender.Uin, caiyunAPI.RealTime)
 	case "出门建议":
 		return callWeatherAPI(sender.Uin, caiyunAPI.Rain)
+	case "今天天气":
+		return callWeatherAPI(sender.Uin, caiyunAPI.Today)
 	case "明天天气":
 		return callWeatherAPI(sender.Uin, caiyunAPI.Tomorrow)
 	}

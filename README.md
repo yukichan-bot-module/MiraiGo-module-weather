@@ -8,8 +8,9 @@ Module for [MiraiGo-Template](https://github.com/Logiase/MiraiGo-Template)
 
 - 在群聊或私聊接收到「实时天气」时查询实时天气情况
 - 在群聊或私聊接收到「出门建议」时查询当前天气是否适合出门
+- 在群聊或私聊接收到「今天天气」时查询今天天气情况
 - 在群聊或私聊接收到「明天天气」时查询明天天气情况
-- 定时在指定群聊发送今日天气信息
+- 定时在指定群聊发送今日/明日天气信息
 
 ## 管理员指令
 
@@ -74,10 +75,12 @@ daily:
     longitude: 116.407526 # 经度
     latitude: 39.90403 # 纬度
     time: 00:00 # 时间 (UTC 时区)
-  - group: 328521977
+    type: today # today | tomorrow
+  - group: 857066811
     longitude: 116.407526
     latitude: 39.90403
-    time: 00:00
+    time: 13:00
+    type: tomorrow
 ```
 
 ## LICENSE
