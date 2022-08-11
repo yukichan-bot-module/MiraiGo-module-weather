@@ -140,9 +140,9 @@ func (c *Caiyun) getDayWeather(longitude, latitude float64, dayIndex int) (strin
 	if daily.Status != "ok" {
 		return "daily api 错误", err
 	}
-	temprature := fmt.Sprintf("全天气温(℃) %.1f ~ %.1f 平均 %.1f\n", daily.Temperature[dayIndex].Min, daily.Temperature[dayIndex].Max, daily.Temperature[dayIndex].Avg)
+	temperature := fmt.Sprintf("全天气温(℃) %.1f ~ %.1f 平均 %.1f\n", daily.Temperature[dayIndex].Min, daily.Temperature[dayIndex].Max, daily.Temperature[dayIndex].Avg)
 	humidity := fmt.Sprintf("全天相对湿度 %0.1f%% ~ %0.1f%% 平均 %0.1f%%\n", daily.Humidity[dayIndex].Min, daily.Humidity[dayIndex].Max, daily.Humidity[dayIndex].Avg)
-	skycon := fmt.Sprintf("天气 %s\n", daily.Skycon[dayIndex].Value)
+	skycon := fmt.Sprintf("全天主要天气现象 %s\n", SkyconParse(daily.Skycon[dayIndex].Value))
 	intensity := fmt.Sprintf("全天降水强度(mm/hr) %.2f ~ %.2f 平均 %.2f\n", daily.Precipitation[dayIndex].Min, daily.Precipitation[dayIndex].Max, daily.Precipitation[dayIndex].Avg)
 	probability := fmt.Sprintf("全天降水概率 %.0f%%\n", daily.Precipitation[dayIndex].Probability*100)
 	wind := fmt.Sprintf("全天风速(km/hr) %.2f ~ %.2f 平均 %.2f\n", daily.Wind[dayIndex].Min, daily.Wind[dayIndex].Max, daily.Wind[dayIndex].Avg)
@@ -159,7 +159,7 @@ func (c *Caiyun) getDayWeather(longitude, latitude float64, dayIndex int) (strin
 	comfort := fmt.Sprintf("舒适指数 %s\n", daily.LifeIndex.Comfort[dayIndex].Description)
 	coldrisk := fmt.Sprintf("感冒指数 %s\n", daily.LifeIndex.ColdRisk[dayIndex].Description)
 	origin := "信息来源：彩云天气"
-	result := temprature + humidity + skycon + intensity + probability + wind + pressure + visibility + dswrf + aqi + pm25 + sunrise + sunset + ultraviolet + carwashing + dressing + comfort + coldrisk + origin
+	result := temperature + humidity + skycon + intensity + probability + wind + pressure + visibility + dswrf + aqi + pm25 + sunrise + sunset + ultraviolet + carwashing + dressing + comfort + coldrisk + origin
 	return result, nil
 }
 
