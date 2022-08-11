@@ -47,6 +47,7 @@ type Config struct {
 		Longitude float64 `json:"longitude"`
 		Latitude  float64 `json:"latitude"`
 		Time      string  `json:"time"`
+		Type      string  `json:"type"`
 	} `json:"daily"`
 }
 
