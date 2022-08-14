@@ -2,7 +2,6 @@ package weather
 
 import (
 	"fmt"
-	"log"
 	"os"
 	"strconv"
 	"strings"
@@ -293,22 +292,21 @@ func updateLocation(sender *message.Sender, msg string) string {
 	if latitude < -90.0 || latitude > 90.0 {
 		return fmt.Sprintf("解析失败，「%.4f」不是正确的纬度。", latitude)
 	}
-	log.Println("经纬度", longitude, latitude)
 	dbService := service.NewDBService(database.GetDB())
 	_, err = dbService.GetUser(sender.Uin)
 	if err == gorm.ErrRecordNotFound {
 		if err = dbService.CreateUser(sender.Uin, sender.Nickname, longitude, latitude); err != nil {
-			log.Println("Fail to create user.", err)
+			logger.WithError(err).Errorf("Fail to create user.")
 			return DatabaseErrorMessage
 		}
 		return "保存成功。"
 	}
 	if err != nil {
-		log.Println("Fail to get user.")
+		logger.WithError(err).Errorf("Fail to get user.")
 		return DatabaseErrorMessage
 	}
 	if err := dbService.UpdateUserInfo(sender.Uin, sender.Nickname, longitude, latitude); err != nil {
-		log.Print("Fail to update user.")
+		logger.WithError(err).Errorf("Fail to update user.")
 		return DatabaseErrorMessage
 	}
 	return "保存成功。"
@@ -321,13 +319,13 @@ func callWeatherAPI(uin int64, apiCalled func(float64, float64) (string, error))
 		if err == gorm.ErrRecordNotFound {
 			return "未查询到地址信息，可通过群聊或私聊发送「修改地址 经度 纬度」来添加地址信息，经纬度信息需保留四位小数以上以保证精确度。示例：「修改地址 101.6656 39.2072」。发送后数据会被保存，如需修改使用同样的指令即可。\n\n注：不支持城市，因为城市准确度很差。本 bot 使用的 api 为付费 api，请勿滥用。"
 		}
-		log.Println("Fail to get user location.")
+		logger.WithError(err).Errorf("Fail to get user location.")
 		return DatabaseErrorMessage
 	}
 	if !inWhitelist(uin) {
 		times, err := dbService.GetUserTimes(uin)
 		if err != nil {
-			log.Println("Fail to get user times.")
+			logger.WithError(err).Errorf("Fail to get user times.")
 			return DatabaseErrorMessage
 		}
 		if times >= weatherConfig.Limit {
@@ -335,7 +333,7 @@ func callWeatherAPI(uin int64, apiCalled func(float64, float64) (string, error))
 		}
 	}
 	if err := dbService.IncreaseUserTimes(uin); err != nil {
-		log.Println("Fail to increase user times")
+		logger.WithError(err).Errorf("Fail to increase user times.")
 		return DatabaseErrorMessage
 	}
 	apiResponse, err := apiCalled(longitude, latitude)
