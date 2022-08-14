@@ -26,8 +26,10 @@ daily:
     latitude: 39.90403 # 纬度
     time: 00:00 # 时间 (UTC 时区)
     type: today # today | tomorrow
+    notify: "早上好啊！北京市今天天气：" # 提示语
   - group: 857066811
     longitude: 116.407526
     latitude: 39.90403
     time: 13:00
     type: tomorrow
+    notify: "晚上好啊！北京市明天天气："

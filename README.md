@@ -16,8 +16,11 @@ Module for [MiraiGo-Template](https://github.com/Logiase/MiraiGo-Template)
 
 - `.weather.clear.times <uin>` 清空用户调用次数
 - `.weather.blacklist.add <uin>` 添加用户到黑名单
+- `.weather.blacklist.remove <uin>` 从黑名单移除用户
 - `.weather.whitelist.add <uin>` 添加用户到白名单
+- `.weather.whitelist.remove <uin>` 从白名单移除用户
 - `.weather.allowed` 添加群到许可名单
+- `.weather.disallowed` 将群移除许可名单
 
 ## 使用方法
 
@@ -76,11 +79,13 @@ daily:
     latitude: 39.90403 # 纬度
     time: 00:00 # 时间 (UTC 时区)
     type: today # today | tomorrow
+    notify: "早上好啊！北京市今天天气：" # 提示语
   - group: 857066811
     longitude: 116.407526
     latitude: 39.90403
     time: 13:00
     type: tomorrow
+    notify: "晚上好啊！北京市明天天气："
 ```
 
 ## LICENSE

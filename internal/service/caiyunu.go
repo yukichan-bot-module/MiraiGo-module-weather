@@ -145,7 +145,7 @@ func (c *Caiyun) getDayWeather(longitude, latitude float64, dayIndex int) (strin
 	skycon := fmt.Sprintf("全天主要天气现象 %s\n", SkyconParse(daily.Skycon[dayIndex].Value))
 	intensity := fmt.Sprintf("全天降水强度(mm/hr) %.2f ~ %.2f 平均 %.2f\n", daily.Precipitation[dayIndex].Min, daily.Precipitation[dayIndex].Max, daily.Precipitation[dayIndex].Avg)
 	probability := fmt.Sprintf("全天降水概率 %.0f%%\n", daily.Precipitation[dayIndex].Probability*100)
-	wind := fmt.Sprintf("全天风速(km/hr) %.2f ~ %.2f 平均 %.2f\n", daily.Wind[dayIndex].Min, daily.Wind[dayIndex].Max, daily.Wind[dayIndex].Avg)
+	wind := fmt.Sprintf("全天风速(km/hr) %.2f ~ %.2f 平均 %.2f\n", daily.Wind[dayIndex].Min.Speed, daily.Wind[dayIndex].Max.Speed, daily.Wind[dayIndex].Avg.Speed)
 	pressure := fmt.Sprintf("全天地面气压(Pa) %.2f ~ %.2f 平均 %.2f\n", daily.Pressure[dayIndex].Min, daily.Pressure[dayIndex].Max, daily.Pressure[dayIndex].Avg)
 	visibility := fmt.Sprintf("全天地表水平能见度 %.1f ~ %.1f 平均 %.1f\n", daily.Visibility[dayIndex].Min, daily.Visibility[dayIndex].Max, daily.Visibility[dayIndex].Avg)
 	dswrf := fmt.Sprintf("全天向下短波辐射通量(W/M2) %.1f ~ %.1f 平均 %.1f\n", daily.Dswrf[dayIndex].Min, daily.Dswrf[dayIndex].Max, daily.Dswrf[dayIndex].Avg)

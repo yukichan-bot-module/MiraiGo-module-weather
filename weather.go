@@ -3,6 +3,7 @@ package weather
 import (
 	"fmt"
 	"log"
+	"os"
 	"strconv"
 	"strings"
 	"sync"
@@ -22,33 +23,34 @@ import (
 
 // Config 模块配置
 type Config struct {
-	Key       string  `json:"key"`
-	Limit     int     `json:"limit"`
-	Admin     []int64 `json:"admin"`
-	Allowed   []int64 `json:"allowed"`
-	BlackList []int64 `json:"blacklist"`
-	WhiteList []int64 `json:"whitelist"`
+	Key       string  `yaml:"key"`
+	Limit     int     `yaml:"limit"`
+	Admin     []int64 `yaml:"admin"`
+	Allowed   []int64 `yaml:"allowed"`
+	BlackList []int64 `yaml:"blacklist"`
+	WhiteList []int64 `yaml:"whitelist"`
 	DB        struct {
-		Type  string `json:"type"`
+		Type  string `yaml:"type"`
 		MySQL struct {
-			Username string `json:"username"`
-			Password string `json:"password"`
-			Host     string `json:"host"`
-			Port     string `json:"port"`
-			Database string `json:"database"`
-			Charset  string `json:"charset"`
-		} `json:"mysql"`
+			Username string `yaml:"username"`
+			Password string `yaml:"password"`
+			Host     string `yaml:"host"`
+			Port     string `yaml:"port"`
+			Database string `yaml:"database"`
+			Charset  string `yaml:"charset"`
+		} `yaml:"mysql"`
 		SQLite struct {
-			Path string `json:"path"`
-		} `json:"sqlite"`
-	} `json:"db"`
+			Path string `yaml:"path"`
+		} `yaml:"sqlite"`
+	} `yaml:"db"`
 	Daily []struct {
-		GroupCode int64   `json:"group"`
-		Longitude float64 `json:"longitude"`
-		Latitude  float64 `json:"latitude"`
-		Time      string  `json:"time"`
-		Type      string  `json:"type"`
-	} `json:"daily"`
+		GroupCode int64   `yaml:"group"`
+		Longitude float64 `yaml:"longitude"`
+		Latitude  float64 `yaml:"latitude"`
+		Time      string  `yaml:"time"`
+		Type      string  `yaml:"type"`
+		Notify    string  `yaml:"notify"`
+	} `yaml:"daily"`
 }
 
 // DatabaseErrorMessage 数据库错误信息
@@ -126,11 +128,7 @@ func (w *weather) Serve(b *bot.Bot) {
 		if inBlacklist(msg.Sender.Uin) {
 			return
 		}
-		// 忽略未开启功能的群组
-		if !isAllowedGroup(msg.GroupCode) {
-			return
-		}
-		replyMsgString := groupWeatherService(msg.Sender, msg.ToString())
+		replyMsgString := groupWeatherService(msg)
 		if replyMsgString == "" {
 			return
 		}
@@ -142,7 +140,7 @@ func (w *weather) Serve(b *bot.Bot) {
 		if inBlacklist(msg.Sender.Uin) {
 			return
 		}
-		replyMsgString := privateWeatherService(msg.Sender, msg.ToString())
+		replyMsgString := privateWeatherService(msg)
 		if replyMsgString == "" {
 			return
 		}
@@ -164,18 +162,19 @@ func (w *weather) Serve(b *bot.Bot) {
 	for _, d := range weatherConfig.Daily {
 		s.Every(1).Day().At(d.Time).Do(func() {
 			caiyunAPI := service.NewCaiyun(weatherConfig.Key)
-			replyMsgString := ""
+			weatherString := ""
 			switch d.Type {
 			case "today":
-				replyMsgString, _ = caiyunAPI.Today(d.Longitude, d.Latitude)
+				weatherString, _ = caiyunAPI.Today(d.Longitude, d.Latitude)
 			case "tomorrow":
-				replyMsgString, _ = caiyunAPI.Tomorrow(d.Longitude, d.Latitude)
+				weatherString, _ = caiyunAPI.Tomorrow(d.Longitude, d.Latitude)
 			default:
-				replyMsgString = "配置文件错误，请检查"
+				weatherString = "配置文件错误，请检查"
 			}
-			if replyMsgString == "" {
+			if weatherString == "" {
 				return
 			}
+			replyMsgString := d.Notify + "\n" + weatherString
 			msg := message.NewSendingMessage().Append(message.NewText(replyMsgString))
 			b.SendGroupMessage(d.GroupCode, msg)
 		})
@@ -204,7 +203,9 @@ func (w *weather) Stop(b *bot.Bot, wg *sync.WaitGroup) {
 }
 
 // privateWeatherService 私聊服务
-func privateWeatherService(sender *message.Sender, msg string) string {
+func privateWeatherService(privateMsg *message.PrivateMessage) string {
+	sender := privateMsg.Sender
+	msg := privateMsg.ToString()
 	if strings.HasPrefix(msg, "修改地址 ") {
 		return updateLocation(sender, msg)
 	}
@@ -223,21 +224,35 @@ func privateWeatherService(sender *message.Sender, msg string) string {
 }
 
 // groupWeatherService 群聊服务
-func groupWeatherService(sender *message.Sender, msg string) string {
+func groupWeatherService(groupMsg *message.GroupMessage) string {
+	sender := groupMsg.Sender
+	msg := groupMsg.ToString()
+	// 检查管理员指令
 	if strings.HasPrefix(msg, ".weather.") && isAdmin(sender.Uin) {
 		switch {
 		case strings.HasPrefix(msg, ".weather.clear.times "):
-			return clearUserTimes(sender.Uin, msg)
+			return clearUserTimes(msg)
 		case strings.HasPrefix(msg, ".weather.blacklist.add "):
-			return addUserToBlacklist(sender.Uin, msg)
+			return addUserToBlacklist(msg)
+		case strings.HasPrefix(msg, ".weather.blacklist.remove "):
+			return removeUserFromBlacklist(msg)
 		case strings.HasPrefix(msg, ".weather.whitelist.add "):
-			return addUserToWhitelist(sender.Uin, msg)
-		case strings.HasPrefix(msg, ".weather.allowed "):
-			return addGroupToAllowed(sender.Uin, msg)
+			return addUserToWhitelist(msg)
+		case strings.HasPrefix(msg, ".weather.whitelist.remove "):
+			return removeUserFromWhitelist(msg)
+		case msg == ".weather.allowed":
+			return addGroupToAllowed(groupMsg.GroupCode)
+		case msg == ".weather.disallowed":
+			return removeGroupFromAllowed(groupMsg.GroupCode)
 		default:
 			return ""
 		}
 	}
+	// 忽略未开启功能的群组
+	if !isAllowedGroup(groupMsg.GroupCode) {
+		return ""
+	}
+	// 解析用户指令
 	if strings.HasPrefix(msg, "修改地址 ") {
 		return updateLocation(sender, msg)
 	}
@@ -331,27 +346,175 @@ func callWeatherAPI(uin int64, apiCalled func(float64, float64) (string, error))
 }
 
 // clearUserTimes 清除用户调用次数
-func clearUserTimes(uin int64, msg string) string {
-	// TODO
-	return "这个功能还没有开发呢。"
+func clearUserTimes(msg string) string {
+	if len(msg) <= 21 {
+		return ""
+	}
+	uinString := msg[21:]
+	uin, err := strconv.ParseInt(uinString, 10, 64)
+	if err != nil {
+		return fmt.Sprintf("解析失败，「%s」不是正确的 uin。", uinString)
+	}
+	dbService := service.NewDBService(database.GetDB())
+	err = dbService.ClearUserTimes(uin)
+	if err != nil {
+		logger.WithError(err).Errorf("Fail to clear user times.")
+		return "数据库错误，请检查后台日志。"
+	}
+	return "清除用户调用次数成功。"
 }
 
 // addUserToBlacklist 添加用户到黑名单
-func addUserToBlacklist(uin int64, msg string) string {
-	// TODO
-	return "这个功能还没有开发呢。"
+func addUserToBlacklist(msg string) string {
+	if len(msg) <= 23 {
+		return ""
+	}
+	uinString := msg[23:]
+	uin, err := strconv.ParseInt(uinString, 10, 64)
+	if err != nil {
+		return fmt.Sprintf("解析失败，「%s」不是正确的 uin。", uinString)
+	}
+	if inBlacklist(uin) {
+		return "该用户已在黑名单中。"
+	}
+	weatherConfig.BlackList = append(weatherConfig.BlackList, uin)
+	err = updateWeatherConfigFile(weatherConfig)
+	if err != nil {
+		logger.WithError(err).Errorf("Fail to update config file.")
+		return "在更新配置文件时出现了错误，请查看后台日志。"
+	}
+	return fmt.Sprintf("成功添加用户「%d」到黑名单。", uin)
+}
+
+// removeUserFromBlacklist 将用户从黑名单中移除
+func removeUserFromBlacklist(msg string) string {
+	if len(msg) <= 26 {
+		return ""
+	}
+	uinString := msg[26:]
+	uin, err := strconv.ParseInt(uinString, 10, 64)
+	if err != nil {
+		return fmt.Sprintf("解析失败，「%s」不是正确的 uin。", uinString)
+	}
+	if !inBlacklist(uin) {
+		return "该用户不在黑名单中。"
+	}
+	for i, v := range weatherConfig.BlackList {
+		if v == uin {
+			weatherConfig.BlackList = append(weatherConfig.BlackList[:i], weatherConfig.BlackList[i+1:]...)
+			break
+		}
+	}
+	err = updateWeatherConfigFile(weatherConfig)
+	if err != nil {
+		logger.WithError(err).Errorf("Fail to update config file.")
+		return "在更新配置文件时出现了错误，请查看后台日志。"
+	}
+	return fmt.Sprintf("成功将用户「%d」从黑名单中移除。", uin)
 }
 
 // addUserToWhitelist 添加用户到白名单
-func addUserToWhitelist(uin int64, msg string) string {
-	// TODO
-	return "这个功能还没有开发呢。"
+func addUserToWhitelist(msg string) string {
+	if len(msg) <= 23 {
+		return ""
+	}
+	uinString := msg[23:]
+	uin, err := strconv.ParseInt(uinString, 10, 64)
+	if err != nil {
+		return fmt.Sprintf("解析失败，「%s」不是正确的 uin。", uinString)
+	}
+	if inWhitelist(uin) {
+		return "该用户已在白名单中。"
+	}
+	weatherConfig.WhiteList = append(weatherConfig.WhiteList, uin)
+	err = updateWeatherConfigFile(weatherConfig)
+	if err != nil {
+		logger.WithError(err).Errorf("Fail to update config file.")
+		return "在更新配置文件时出现了错误，请查看后台日志。"
+	}
+	return fmt.Sprintf("成功添加用户「%d」到白名单。", uin)
+}
+
+// removeUserFromWhitelist 将用户从白名单中移除
+func removeUserFromWhitelist(msg string) string {
+	if len(msg) <= 26 {
+		return ""
+	}
+	uinString := msg[26:]
+	uin, err := strconv.ParseInt(uinString, 10, 64)
+	if err != nil {
+		return fmt.Sprintf("解析失败，「%s」不是正确的 uin。", uinString)
+	}
+	if !inWhitelist(uin) {
+		return "该用户不在白名单中。"
+	}
+	for i, v := range weatherConfig.WhiteList {
+		if v == uin {
+			weatherConfig.WhiteList = append(weatherConfig.WhiteList[:i], weatherConfig.WhiteList[i+1:]...)
+			break
+		}
+	}
+	err = updateWeatherConfigFile(weatherConfig)
+	if err != nil {
+		logger.WithError(err).Errorf("Fail to update config file.")
+		return "在更新配置文件时出现了错误，请查看后台日志。"
+	}
+	return fmt.Sprintf("成功将用户「%d」从白名单中移除。", uin)
 }
 
 // addGroupToAllowed 添加群组到许可名单
-func addGroupToAllowed(uin int64, msg string) string {
-	// TODO
-	return "这个功能还没有开发呢。"
+func addGroupToAllowed(groupCode int64) string {
+	if isAllowedGroup(groupCode) {
+		return "本群已加入许可名单。"
+	}
+	weatherConfig.Allowed = append(weatherConfig.Allowed, groupCode)
+	err := updateWeatherConfigFile(weatherConfig)
+	if err != nil {
+		logger.WithError(err).Errorf("Fail to update config file.")
+		return "在更新配置文件时出现了错误，请查看后台日志。"
+	}
+	return fmt.Sprintf("成功添加群「%d」到许可名单。", groupCode)
+}
+
+// removeGroupFromAllowed 将群组从许可名单中移除
+func removeGroupFromAllowed(groupCode int64) string {
+	if !isAllowedGroup(groupCode) {
+		return "本群不在许可名单中。"
+	}
+	for i, v := range weatherConfig.Allowed {
+		if v == groupCode {
+			weatherConfig.Allowed = append(weatherConfig.Allowed[:i], weatherConfig.Allowed[i+1:]...)
+			break
+		}
+	}
+	err := updateWeatherConfigFile(weatherConfig)
+	if err != nil {
+		logger.WithError(err).Errorf("Fail to update config file.")
+		return "在更新配置文件时出现了错误，请查看后台日志。"
+	}
+	return fmt.Sprintf("成功将群「%d」从许可名单中移除。", groupCode)
+}
+
+func updateWeatherConfigFile(newConfig Config) error {
+	path := config.GlobalConfig.GetString("aimerneige.weather.path")
+	if path == "" {
+		path = "./weather.yaml"
+	}
+	data, err := yaml.Marshal(newConfig)
+	if err != nil {
+		return err
+	}
+	f, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC, 0644)
+	if err != nil {
+		return err
+	}
+	defer f.Close()
+	_, err = f.Write(data)
+	if err != nil {
+		return err
+	}
+	weatherConfig = newConfig
+	return nil
 }
 
 func isAdmin(uin int64) bool {
