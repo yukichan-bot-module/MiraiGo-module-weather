@@ -159,23 +159,29 @@ func (w *weather) Serve(b *bot.Bot) {
 		}
 	})
 	for _, d := range weatherConfig.Daily {
-		s.Every(1).Day().At(d.Time).Do(func() {
+		_groupCode := d.GroupCode
+		_longitude := d.Longitude
+		_latitude := d.Latitude
+		_time := d.Time
+		_type := d.Type
+		_notify := d.Notify
+		s.Every(1).Day().At(_time).Do(func() {
 			caiyunAPI := service.NewCaiyun(weatherConfig.Key)
 			weatherString := ""
-			switch d.Type {
+			switch _type {
 			case "today":
-				weatherString, _ = caiyunAPI.Today(d.Longitude, d.Latitude)
+				weatherString, _ = caiyunAPI.Today(_longitude, _latitude)
 			case "tomorrow":
-				weatherString, _ = caiyunAPI.Tomorrow(d.Longitude, d.Latitude)
+				weatherString, _ = caiyunAPI.Tomorrow(_longitude, _latitude)
 			default:
 				weatherString = "配置文件错误，请检查"
 			}
 			if weatherString == "" {
 				return
 			}
-			replyMsgString := d.Notify + "\n" + weatherString
+			replyMsgString := _notify + "\n" + weatherString
 			msg := message.NewSendingMessage().Append(message.NewText(replyMsgString))
-			b.SendGroupMessage(d.GroupCode, msg)
+			b.SendGroupMessage(_groupCode, msg)
 		})
 	}
 	s.StartAsync()
