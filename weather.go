@@ -156,6 +156,13 @@ func (w *weather) Serve(b *bot.Bot) {
 				err = dbService.ClearAllUserTimes()
 				logger.WithError(err).Errorf("Fail to clear user times. The %d times to retry.", i)
 			}
+			if err != nil {
+				// 重试三次依然错误，发送消息提示管理员
+				for _, admin := range weatherConfig.Admin {
+					msg := message.NewSendingMessage().Append(message.NewText("服务器又挂掉啦~\n错误信息：\n无法清空用户次数。"))
+					b.SendPrivateMessage(admin, msg)
+				}
+			}
 		}
 	})
 	for _, d := range weatherConfig.Daily {
