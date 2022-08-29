@@ -118,7 +118,7 @@ func (w *weather) PostInit() {
 
 // Serve 注册服务函数部分
 func (w *weather) Serve(b *bot.Bot) {
-	b.OnGroupMessage(func(c *client.QQClient, msg *message.GroupMessage) {
+	b.GroupMessageEvent.Subscribe(func(c *client.QQClient, msg *message.GroupMessage) {
 		// 忽略匿名消息
 		if msg.Sender.IsAnonymous() {
 			return
@@ -134,7 +134,7 @@ func (w *weather) Serve(b *bot.Bot) {
 		replyMsg := message.NewSendingMessage().Append(message.NewText(replyMsgString))
 		c.SendGroupMessage(msg.GroupCode, replyMsg)
 	})
-	b.OnPrivateMessage(func(c *client.QQClient, msg *message.PrivateMessage) {
+	b.PrivateMessageEvent.Subscribe(func(c *client.QQClient, msg *message.PrivateMessage) {
 		// 忽略黑名单用户
 		if inBlacklist(msg.Sender.Uin) {
 			return
