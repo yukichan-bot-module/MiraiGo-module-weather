@@ -70,6 +70,8 @@ func (d *DBService) ClearUserTimes(uin int64) error {
 }
 
 // ClearAllUserTimes 清空全部用户调用次数
+// view https://gorm.io/docs/update.html#Block-Global-Updates
+// for more detail about `.Where("1 = 1")`
 func (d *DBService) ClearAllUserTimes() error {
-	return d.db.Model(&model.User{}).Update("times", 0).Error
+	return d.db.Model(&model.User{}).Where("1 = 1").Update("times", 0).Error
 }
